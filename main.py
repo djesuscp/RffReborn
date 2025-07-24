@@ -1,49 +1,58 @@
-import tkinter
-from tkinter import *
-from tkinter.ttk import *
+import os
 
-# Main screen configuration.
-mainScreen = tkinter.Tk()
-mainScreen.title("RffReborn")
-mainScreen.geometry("800x800")
-mainScreen.configure(bg="#000000")
+directories = []
+coincidences = []
 
-# Labels.
-title = tkinter.Label(mainScreen, text="RffReborn", font=("Arial", 20), bg="#000000", fg="#FFFFFF")
-title.grid(row=0, column=0, columnspan=7)
+def retrieveDirectories():
+    i = 0
+    while i < 2:
+        path = input(f'Specify path: ')
+        if path == 0:
+            break
+        else:
+            directories.append(path)
+        i += 1
 
-# Text Fields.
-field1 = tkinter.Entry(mainScreen, width=60)
-field2 = tkinter.Entry(mainScreen, width=60)
-field3 = tkinter.Entry(mainScreen, width=60)
-field4 = tkinter.Entry(mainScreen, width=60)
-field1.grid(row=1, column=0)
-field2.grid(row=2, column=0)
-field3.grid(row=3, column=0)
-field4.grid(row=4, column=0)
+def checkIfDirectory(directory):
+    if os.path.isdir(directory):
+        print('Directory confirmed.')
+        return True
+    else:
+        print('NOT a directory.')
+        return False
 
-# Text Area.
-console = tkinter.Text(mainScreen, font=("courier new", 14), bg="#FFFFFF", fg="#000000", width=75)
-console.grid(row=5, column=0, columnspan=7)
+def countValidDirectories():
+    counter = 0
+    for x in directories:
+        if checkIfDirectory(x):
+            counter += 1
+            print(f'Directory counter> {counter}')
+    if counter <= 2:
+        return True
+    else:
+        print(f'There are not enough directories to compare. Please, provide at least 2 valid directories.')
+        return False
 
-# Buttons.
-button1 = Button(mainScreen, text="Browse...")
-button1.grid(row=1, column=1)
-button2 = Button(mainScreen, text="Browse...")
-button2.grid(row=2, column=1)
-button3 = Button(mainScreen, text="Browse...")
-button3.grid(row=3, column=1)
-button4 = Button(mainScreen, text="Browse...")
-button4.grid(row=4, column=1)
-# Button styles.
-style = Style()
-style.theme_use('clam')
-style.configure('TButton', font=("Arial", 14), background="darkred", foreground="white", borderwidth=0)
-style.map('TButton',
-    foreground=[('pressed', 'white'), ('active', 'white')],
-    background=[('pressed', 'pink'), ('active', 'red')],
-)
+def getFileList(path):
+    list = []
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            list.append(os.path.join(root, file))
+    return list
 
-# Main method to launch the app.
+def compareLists(list1, list2):
+    coincidences = []
+    for x in range(len(list1)):
+        fileName1 = os.path.basename(list1[x])
+        fileSize1 = os.path.getsize(list1[x])
+        for i in range(len(list2)):
+            fileName2 = os.path.basename(list2[i])
+            fileSize2 = os.path.getsize(list2[i])
+            if fileName1 == fileName2 and fileSize1 == fileSize2:
+                coincidences.append(fileName2)
+    print('COINCIDENCES: ', coincidences)
+
+
 if __name__ == "__main__":
-    mainScreen.mainloop()
+    retrieveDirectories()
+    compareLists(getFileList(directories[0]), getFileList(directories[1]))
