@@ -115,6 +115,10 @@ mainScreen.title("RffReborn")
 mainScreen.geometry("1600x800")
 mainScreen.configure(bg="#000000")
 
+# Frames.
+frame1 = tkinter.Frame(mainScreen, borderwidth=2, relief='solid')
+frame1.grid(row=0, column=0, padx=10, pady=10)
+
 # Labels.
 title = tkinter.Label(mainScreen, text="RffReborn", font=("Arial", 20), bg="#000000", fg="#FFFFFF")
 title.grid(row=0, column=0, columnspan=7)
