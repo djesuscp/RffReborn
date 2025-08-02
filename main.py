@@ -1,8 +1,10 @@
 import tkinter
 from tkinter import *
 from tkinter.ttk import *
+from tkinter import ttk
 from tkinter import filedialog
 import os
+import time
 
 directories = []
 coincidenceList1 = []
@@ -75,6 +77,7 @@ def deleteEmptyDirectories(list):
 
 # Functions.
 def browseDirectory(field, fieldRef, operation):
+    iniciar_progreso()
     selectedDirectory = filedialog.askdirectory()
     if operation == 0:
         retrieveDirectory(selectedDirectory)
@@ -176,6 +179,20 @@ style.map('TButton',
     foreground=[('pressed', 'white'), ('active', 'white'), ('disabled', 'black')],
     background=[('pressed', 'pink'), ('active', 'red'), ('disabled', 'grey')],
 )
+
+# Progress bar.
+def iniciar_progreso():
+    progreso['value'] = 0
+    maximo = 100
+    progreso['maximum'] = maximo
+    for i in range(maximo + 1):
+        progreso['value'] = i
+        mainScreen.update_idletasks()  # Actualiza la interfaz
+        time.sleep(0.05)  # Simula un proceso lento
+
+progreso = ttk.Progressbar(mainScreen, orient="horizontal", length=300, mode="indeterminate")
+progreso.pack(pady=20)
+progreso.start()
 
 # Main method to launch the app.
 if __name__ == "__main__":
