@@ -31,11 +31,10 @@ def countValidDirectories():
         if checkIfDirectory(x):
             counter += 1
             print(f'Directory counter> {counter}')
-    if counter <= 2:
-        return True
+    if counter == 2:
+        startButton.config(state=tkinter.NORMAL)
     else:
         print(f'There are not enough directories to compare. Please, provide at least 2 valid directories.')
-        return False
 
 def getFileList(path):
     list = []
@@ -75,17 +74,24 @@ def deleteEmptyDirectories(list):
             showTextConsole(f'\nThe following directory has been successfully DELETED: {dirList[x]}')
 
 # Functions.
-def browseDirectory(field, fieldRef):
+def browseDirectory(field, fieldRef, operation):
     selectedDirectory = filedialog.askdirectory()
-    retrieveDirectory(selectedDirectory)
-    field.insert(0, selectedDirectory)
-    if fieldRef == 'First':
+    if operation == 0:
+        retrieveDirectory(selectedDirectory)
+        field.insert(0, selectedDirectory)
         showTextConsole(f'{fieldRef} selected directory is: ' + selectedDirectory)
+        countValidDirectories()
     else:
-        showTextConsole(f'\n{fieldRef} selected directory is: ' + selectedDirectory)
+        field.insert(0, selectedDirectory)
+        showTextConsole(f'{fieldRef} selected directory is: ' + selectedDirectory)
+        sortMixButton.config(state=tkinter.NORMAL)
 
 def showTextConsole(text):
-    console.insert(tkinter.END, text)
+    currentText = console.get("1.0", "end").strip()
+    if currentText == "":
+        console.insert(tkinter.END, text)
+    else:
+        console.insert(tkinter.END, "\n" + text)
 
 def showSearchResults():
     compareLists()
@@ -97,7 +103,6 @@ def showSearchResults():
     showTextConsole('\nEND OF DIR2 LIST.')
     deleteButton1.config(state=tkinter.NORMAL)
     deleteButton2.config(state=tkinter.NORMAL)
-    sortMixButton.config(state=tkinter.NORMAL)
 
 def cleanDir(num):
     showTextConsole('\nCLEANING...')
@@ -116,58 +121,52 @@ mainScreen.geometry("1600x800")
 mainScreen.configure(bg="#000000")
 
 # Frames.
-frame1 = tkinter.Frame(mainScreen, borderwidth=2, relief='solid')
-frame1.grid(row=0, column=0, padx=10, pady=10)
+# frame1 = tkinter.Frame(mainScreen, borderwidth=2, relief='solid')
+# frame1.grid(row=0, column=0, padx=10, pady=10)
 
 # Labels.
 title = tkinter.Label(mainScreen, text="RffReborn", font=("Arial", 20), bg="#000000", fg="#FFFFFF")
 title.grid(row=0, column=0, columnspan=7)
 subtitle1 = tkinter.Label(mainScreen, text="---- Compare directories section ----", font=("Arial", 16), bg="#000000", fg="#FFFFFF")
 subtitle1.grid(row=1, column=0, columnspan=3)
-text1 = tkinter.Label(mainScreen, text="In this section, you will find 2 fields in which you should browse the directories you want to compare.\nThis program will find out the repeated files and let the user decide wether to delete them from one or both of the directories.", font=("Arial", 10), bg="#000000", fg="#FFFFFF")
+text1 = tkinter.Label(mainScreen, text="In this section, you will find 2 fields in which you should browse\nthe directories you want to compare. This program will find out\nthe repeated files and let the user decide wether to\ndelete them from one or both of the directories.", font=("Arial", 10), bg="#000000", fg="#FFFFFF")
 text1.grid(row=2, column=0, columnspan=3)
 subtitle2 = tkinter.Label(mainScreen, text="---- Sort and Mix section ----", font=("Arial", 16), bg="#000000", fg="#FFFFFF")
 subtitle2.grid(row=1, column=3, columnspan=3)
-text2 = tkinter.Label(mainScreen, text="In this section, there is a field in which you must specify the new directory path, followed by another field which will request a name for the new folder.\nOnce the button is pressed, the program will make a security copy in the selected path, saving all the files but the repeated ones.", font=("Arial", 10), bg="#000000", fg="#FFFFFF")
+text2 = tkinter.Label(mainScreen, text="In this section, there is a field in which you must specify\nthe new directory path. Once the button \"SMC\" (sort, mix and clean)\n is pressed, the program will make a security copy in the selected path,\nsaving all the files properly without repeating any of them.\nFinally, the program will clean the original directories to save espace for the user.", font=("Arial", 10), bg="#000000", fg="#FFFFFF")
 text2.grid(row=2, column=3, columnspan=3)
-text3 = tkinter.Label(mainScreen, text="<-- Please, input here the name of the new folder.", font=("Arial", 10), bg="#000000", fg="#FFFFFF")
-text3.grid(row=4, column=4)
 
 # Text Fields.
 field1 = tkinter.Entry(mainScreen, width=60)
 field2 = tkinter.Entry(mainScreen, width=60)
+field3 = tkinter.Entry(mainScreen, width=60)
 field1.grid(row=3, column=0)
 field2.grid(row=4, column=0)
-field3 = tkinter.Entry(mainScreen, width=60)
-field4 = tkinter.Entry(mainScreen, width=60)
 field3.grid(row=3, column=3)
-field4.grid(row=4, column=3)
 
 # Text Area.
 console = tkinter.Text(mainScreen, font=("courier new", 14), bg="#FFFFFF", fg="#000000")
 console.grid(row=7, column=0, columnspan=6)
 
 # Buttons.
-browseButton1 = Button(mainScreen, text="Browse...", command = lambda: browseDirectory(field1, 'First'))
+browseButton1 = Button(mainScreen, text="Browse...", command = lambda: browseDirectory(field1, 'First', 0))
 browseButton1.grid(row=3, column=1)
-browseButton2 = Button(mainScreen, text="Browse...", command = lambda: browseDirectory(field2, 'Second'))
+browseButton2 = Button(mainScreen, text="Browse...", command = lambda: browseDirectory(field2, 'Second', 0))
 browseButton2.grid(row=4, column=1)
-browseButton3 = Button(mainScreen, text="Browse...", command = lambda: browseDirectory(field3, 'New'))
+browseButton3 = Button(mainScreen, text="Browse...", command = lambda: browseDirectory(field3, 'New', 1))
 browseButton3.grid(row=3, column=4)
 startButton = Button(mainScreen, text="Start Search", command = showSearchResults)
 startButton.grid(row=5, column=0, columnspan=3)
+startButton.config(state=tkinter.DISABLED)
 deleteButton1 = Button(mainScreen, text="Clean Dir1", command = lambda: cleanDir(1))
 deleteButton1.grid(row=6, column=0)
 deleteButton1.config(state=tkinter.DISABLED)
 deleteButton2 = Button(mainScreen, text="Clean Dir2", command = lambda: cleanDir(2))
 deleteButton2.grid(row=6, column=1)
 deleteButton2.config(state=tkinter.DISABLED)
-sortMixButton = Button(mainScreen, text="Sort and Mix...", command = lambda: cleanDir(2))
+sortMixButton = Button(mainScreen, text="SMC", command = lambda: cleanDir(2))
 sortMixButton.grid(row=5, column=3, columnspan=3)
 sortMixButton.config(state=tkinter.DISABLED)
-
-# Separators.
-
 
 # Button styles.
 style = Style()
