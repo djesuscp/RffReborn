@@ -7,6 +7,8 @@ import os
 import time
 
 directories = []
+ownCoincidenceList1 = []
+ownCoincidenceList2 = []
 coincidenceList1 = []
 coincidenceList2 = []
 
@@ -45,6 +47,32 @@ def getFileList(path):
             list.append(os.path.join(root, file))
     return list
 
+def removeDuplicates(list):
+    x = 0
+    while x < len(list):
+        i = x + 1
+        while i < len(list):
+            if list[x] == list[i]:
+                list.pop(i)
+            else:
+                i += 1
+        x += 1
+
+
+def searchInsideDirectory(list, dirName, coincidences):
+    for x in range(len(list)):
+        fileName1 = os.path.basename(list[x])
+        fileSize1 = os.path.getsize(list[x])
+        for i in range(x+1, len(list)):
+            fileName2 = os.path.basename(list[i])
+            fileSize2 = os.path.getsize(list[i])
+            if fileName1 == fileName2 and fileSize1 == fileSize2:
+                coincidences.append(list[x])
+                coincidences.append(list[i])
+    removeDuplicates(coincidences)
+    showTextConsole(f'\n---------------\nLIST OF REPEATED FILES INSIDE {dirName}:')
+    showTextConsole(showCoincidences(coincidences))
+
 def compareLists():
     list1 = getFileList(directories[0])
     list2 = getFileList(directories[1])
@@ -57,6 +85,12 @@ def compareLists():
             if fileName1 == fileName2 and fileSize1 == fileSize2:
                 coincidenceList1.append(list1[x])
                 coincidenceList2.append(list2[i])
+    showTextConsole('\n---------------\nLIST OF REPEATED FILES BETWEEN DIR1 and DIR2:')
+    showTextConsole(showCoincidences(coincidenceList1))
+    showTextConsole('\nEND OF DIR1 LIST.')
+    showTextConsole('\n---------------\nLIST OF REPEATED FILES BETWEEN DIR2 and DIR1:')
+    showTextConsole(showCoincidences(coincidenceList2))
+    showTextConsole('\nEND OF DIR2 LIST.')
 
 def deleteFiles(list):
     for x in range(len(list)):
@@ -96,24 +130,41 @@ def showTextConsole(text):
         console.insert(tkinter.END, "\n" + text)
 
 def showSearchResults():
+    searchInsideDirectory(getFileList(directories[0]), 'DIR1', ownCoincidenceList1)
+    searchInsideDirectory(getFileList(directories[1]), 'DIR2', ownCoincidenceList2)
     compareLists()
-    showTextConsole('\n---------------\nLIST OF REPEATED FILES IN DIR1:')
-    showTextConsole(showCoincidences(coincidenceList1))
-    showTextConsole('\nEND OF DIR1 LIST.')
-    showTextConsole('\n---------------\nLIST OF REPEATED FILES IN DIR2:')
-    showTextConsole(showCoincidences(coincidenceList2))
-    showTextConsole('\nEND OF DIR2 LIST.')
     deleteButton1.config(state=tkinter.NORMAL)
     deleteButton2.config(state=tkinter.NORMAL)
 
-def cleanDir(num):
+def cleanDir(list):
     showTextConsole('\nCLEANING...')
-    if num == 1:
-        deleteFiles(coincidenceList1)
-        deleteEmptyDirectories(coincidenceList1)
+    deleteFiles(list)
+    deleteEmptyDirectories(list)
+
+def smc(path):
+    if checkIfDirectory(path):
+        if len(ownCoincidenceList1) > 0:
+            True
     else:
-        deleteFiles(coincidenceList2)
-        deleteEmptyDirectories(coincidenceList2)
+        return False
+
+def startProgress(window, bar):
+    task = 10
+    x = 0
+    while(x<task):
+        time.sleep(1)
+        bar['value']+=10
+        x+=1
+        window.update_idletasks()
+
+def showProgressbar(message):
+    progressWindow = tkinter.Toplevel()
+    progressWindow.title(message)
+    progressWindow.geometry("300x200")
+    bar = Progressbar(progressWindow, orient=HORIZONTAL, length=200)
+    bar.pack(pady=10)
+    button = Button(progressWindow, text="Test", command= lambda: startProgress(progressWindow, bar))
+    button.pack()
 
 # GUI.
 # Main screen configuration.
@@ -133,38 +184,42 @@ subtitle1 = tkinter.Label(mainScreen, text="---- Compare directories section ---
 subtitle1.grid(row=1, column=0, columnspan=3)
 text1 = tkinter.Label(mainScreen, text="In this section, you will find 2 fields in which you should browse\nthe directories you want to compare. This program will find out\nthe repeated files and let the user decide wether to\ndelete them from one or both of the directories.", font=("Arial", 10), bg="#000000", fg="#FFFFFF")
 text1.grid(row=2, column=0, columnspan=3)
-subtitle2 = tkinter.Label(mainScreen, text="---- Sort and Mix section ----", font=("Arial", 16), bg="#000000", fg="#FFFFFF")
+subtitle2 = tkinter.Label(mainScreen, text="---- Sort, Mix and Clean section ----", font=("Arial", 16), bg="#000000", fg="#FFFFFF")
 subtitle2.grid(row=1, column=3, columnspan=3)
 text2 = tkinter.Label(mainScreen, text="In this section, there is a field in which you must specify\nthe new directory path. Once the button \"SMC\" (sort, mix and clean)\n is pressed, the program will make a security copy in the selected path,\nsaving all the files properly without repeating any of them.\nFinally, the program will clean the original directories to save espace for the user.", font=("Arial", 10), bg="#000000", fg="#FFFFFF")
 text2.grid(row=2, column=3, columnspan=3)
+dir1Label = tkinter.Label(mainScreen, text="DIR1 path selected by user:", font=("Arial", 10), bg="#000000", fg="#FFFFFF")
+dir1Label.grid(row=3, column=0)
+dir2Label = tkinter.Label(mainScreen, text="DIR2 path selected by user:", font=("Arial", 10), bg="#000000", fg="#FFFFFF")
+dir2Label.grid(row=5, column=0)
 
 # Text Fields.
 field1 = tkinter.Entry(mainScreen, width=60)
 field2 = tkinter.Entry(mainScreen, width=60)
 field3 = tkinter.Entry(mainScreen, width=60)
-field1.grid(row=3, column=0)
-field2.grid(row=4, column=0)
+field1.grid(row=4, column=0)
+field2.grid(row=6, column=0)
 field3.grid(row=3, column=3)
 
 # Text Area.
 console = tkinter.Text(mainScreen, font=("courier new", 14), bg="#FFFFFF", fg="#000000")
-console.grid(row=7, column=0, columnspan=6)
+console.grid(row=10, column=0, columnspan=6)
 
 # Buttons.
 browseButton1 = Button(mainScreen, text="Browse...", command = lambda: browseDirectory(field1, 'First', 0))
-browseButton1.grid(row=3, column=1)
+browseButton1.grid(row=4, column=1)
 browseButton2 = Button(mainScreen, text="Browse...", command = lambda: browseDirectory(field2, 'Second', 0))
-browseButton2.grid(row=4, column=1)
+browseButton2.grid(row=6, column=1)
 browseButton3 = Button(mainScreen, text="Browse...", command = lambda: browseDirectory(field3, 'New', 1))
 browseButton3.grid(row=3, column=4)
 startButton = Button(mainScreen, text="Start Search", command = showSearchResults)
-startButton.grid(row=5, column=0, columnspan=3)
+startButton.grid(row=7, column=0, columnspan=3)
 startButton.config(state=tkinter.DISABLED)
-deleteButton1 = Button(mainScreen, text="Clean Dir1", command = lambda: cleanDir(1))
-deleteButton1.grid(row=6, column=0)
+deleteButton1 = Button(mainScreen, text="Clean Dir1", command = lambda: cleanDir(coincidenceList1))
+deleteButton1.grid(row=8, column=0)
 deleteButton1.config(state=tkinter.DISABLED)
-deleteButton2 = Button(mainScreen, text="Clean Dir2", command = lambda: cleanDir(2))
-deleteButton2.grid(row=6, column=1)
+deleteButton2 = Button(mainScreen, text="Clean Dir2", command = lambda: cleanDir(coincidenceList2))
+deleteButton2.grid(row=8, column=1)
 deleteButton2.config(state=tkinter.DISABLED)
 sortMixButton = Button(mainScreen, text="SMC", command = lambda: cleanDir(2))
 sortMixButton.grid(row=5, column=3, columnspan=3)
