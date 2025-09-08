@@ -148,24 +148,6 @@ def smc(path):
     else:
         return False
 
-def startProgress(window, bar):
-    task = 10
-    x = 0
-    while(x<task):
-        time.sleep(1)
-        bar['value']+=10
-        x+=1
-        window.update_idletasks()
-
-def showProgressbar(message):
-    progressWindow = tkinter.Toplevel()
-    progressWindow.title(message)
-    progressWindow.geometry("300x200")
-    bar = Progressbar(progressWindow, orient=HORIZONTAL, length=200)
-    bar.pack(pady=10)
-    button = Button(progressWindow, text="Test", command= lambda: startProgress(progressWindow, bar))
-    button.pack()
-
 # GUI.
 # Main screen configuration.
 mainScreen = tkinter.Tk()
